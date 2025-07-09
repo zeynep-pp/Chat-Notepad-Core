@@ -1,16 +1,29 @@
-from fastmcp import FastMCP, Client
-import asyncio
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from agent import process_command
+from diff_utils import get_diff
 
-mcp = FastMCP(
-    name="TestServer",
-    instructions="""
-        This server has information about the recent election in NY.
-    """,
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-@mcp.tool
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
+class PromptRequest(BaseModel):
+    text: str
+    command: str
 
-if __name__ == "__main__":
-    mcp.run()
+class PromptResponse(BaseModel):
+    result: str
+    diff: str
+
+@app.post("/prompt", response_model=PromptResponse)
+async def prompt_endpoint(req: PromptRequest):
+    result = process_command(req.text, req.command)
+    diff = get_diff(req.text, result)
+    return {"result": result, "diff": diff}
