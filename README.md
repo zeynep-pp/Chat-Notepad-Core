@@ -8,11 +8,11 @@ SmartNote is a backend agent for a note-taking application that processes natura
 
 ```mermaid
 graph TD
-    A[User Interface (Frontend)] -- Sends text & command --> B[FastAPI Backend (/prompt)]
-    B -- Calls --> C[Agent (Rule-based & LLM)]
-    C -- Returns edited text & diff --> B
-    B -- Returns result & diff --> A
-    C -- Uses --> D[diff-match-patch]
+    A[Frontend (UI)] --> B[FastAPI Backend (/prompt)]
+    B --> C[Agent (Rule-based & LLM)]
+    C --> D[diff-match-patch]
+    C --> B
+    B --> A
 ```
 
 - **Frontend**: React + Monaco/CodeMirror (not included here)
