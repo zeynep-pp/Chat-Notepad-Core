@@ -31,15 +31,15 @@ SmartNote is a backend agent for a note-taking application that processes natura
 **Request:**
 ```json
 {
-  "text": "Merhaba, nasılsın? Bugün hava çok güzel, değil mi?",
+  "text": "Hello, how are you? Today is a beautiful day, isn't it?",
   "command": "Remove all ',' characters from the text."
 }
 ```
 **Response:**
 ```json
 {
-  "result": "Merhaba nasılsın? Bugün hava çok güzel değil mi?",
-  "diff": "<span>Merhaba</span><del>,</del><span> nasılsın? Bugün hava çok güzel</span><del>,</del><span> değil mi?</span>"
+  "result": "Hello how are you? Today is a beautiful day isn't it?",
+  "diff": "<span>Hello</span><del>,</del><span> how are you? Today is a beautiful day</span><del>,</del><span> isn't it?</span>"
 }
 ```
 
@@ -57,7 +57,7 @@ SmartNote is a backend agent for a note-taking application that processes natura
 3. **Test the endpoint:**
    Use Postman, Insomnia, or curl:
    ```sh
-   curl -X POST "http://127.0.0.1:8000/prompt" -H "Content-Type: application/json" -d '{"text": "Merhaba, nasılsın? Bugün hava çok güzel, değil mi?", "command": "Remove all "," characters from the text."}'
+   curl -X POST "http://127.0.0.1:8000/prompt" -H "Content-Type: application/json" -d '{"text": "Hello, how are you? Today is a beautiful day, isn't it?", "command": "Remove all ',' characters from the text."}'
    ```
 
 ---
@@ -79,11 +79,11 @@ SmartNote is a backend agent for a note-taking application that processes natura
 
 ## 📝 Example Use Case
 **Input:**
-- Text: `Merhaba, nasılsın? Bugün hava çok güzel, değil mi?`
+- Text: `Hello, how are you? Today is a beautiful day, isn't it?`
 - Command: `Remove all ',' characters from the text.`
 
 **Output:**
-- Result: `Merhaba nasılsın? Bugün hava çok güzel değil mi?`
+- Result: `Hello how are you? Today is a beautiful day isn't it?`
 - Diff: (HTML, for visual diff viewer)
 
 ---
