@@ -1,5 +1,7 @@
 # ChatNotePad.Ai Agent Backend
 
+[UI Code Repository](https://github.com/zeynep-pp/ChatNotePad.Ai)
+
 ChatNotePad.Ai is a backend agent for a note-taking application that processes natural language commands to edit user text. It exposes a FastAPI server with a `/prompt` endpoint, designed to be integrated with a modern frontend (React, Monaco/CodeMirror, etc.).
 
 ---
