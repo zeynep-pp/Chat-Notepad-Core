@@ -6,14 +6,9 @@ SmartNote is a backend agent for a note-taking application that processes natura
 
 ## 🧩 Architecture
 
-```mermaid
-graph TD
-    A[Frontend (UI)] --> B[FastAPI Backend (/prompt)]
-    B --> C[Agent (Rule-based & LLM)]
-    C --> D[diff-match-patch]
-    C --> B
-    B --> A
-```
+| Frontend (UI) | → | FastAPI Backend (`/prompt`) | → | Agent (Rule-based & LLM) | → | diff-match-patch |
+|:-------------:|:-:|:--------------------------:|:-:|:------------------------:|:-:|:----------------:|
+|               | ← |        (returns)           | ← |         (returns)        |    |                  |
 
 - **Frontend**: React + Monaco/CodeMirror (not included here)
 - **Backend**: FastAPI (this repo)
