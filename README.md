@@ -1,6 +1,6 @@
-# SmartNote Agent Backend
+# ChatNotePad.Ai Agent Backend
 
-SmartNote is a backend agent for a note-taking application that processes natural language commands to edit user text. It exposes a FastAPI server with a `/prompt` endpoint, designed to be integrated with a modern frontend (React, Monaco/CodeMirror, etc.).
+ChatNotePad.Ai is a backend agent for a note-taking application that processes natural language commands to edit user text. It exposes a FastAPI server with a `/prompt` endpoint, designed to be integrated with a modern frontend (React, Monaco/CodeMirror, etc.).
 
 ---
 
