@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from agent import process_command
@@ -21,6 +21,10 @@ class PromptRequest(BaseModel):
 class PromptResponse(BaseModel):
     result: str
     diff: str
+
+@app.get("/")
+async def root():
+    return {"message": "Chat Notepad Core AI API", "status": "running"}
 
 @app.post("/prompt", response_model=PromptResponse)
 async def prompt_endpoint(req: PromptRequest):
