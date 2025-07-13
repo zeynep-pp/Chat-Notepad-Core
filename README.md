@@ -188,7 +188,7 @@ Legacy endpoint that redirects to the new summarizer agent.
 ```
 backend/
 ├── app/
-│   ├── main.py                    # FastAPI app entry point
+│   ├── main.py                    # FastAPI app entry point (new API)
 │   ├── models/
 │   │   ├── __init__.py
 │   │   └── requests.py            # Pydantic request/response models
@@ -200,14 +200,20 @@ backend/
 │   ├── core/
 │   │   ├── __init__.py
 │   │   └── agent_manager.py       # Agent orchestration
-│   └── routers/
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   └── text_operations.py     # API endpoints
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── llm_service.py         # OpenAI integration
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── diff_utils.py          # Diff calculation utilities
+│   └── config/
 │       ├── __init__.py
-│       └── text_operations.py     # API endpoints
-├── main.py                        # Legacy compatibility layer
-├── agent.py                       # Legacy agent logic
-├── diff_utils.py                  # Diff calculation utilities
-├── llm_service.py                 # OpenAI integration
-├── config.py                      # Configuration
+│       └── config.py              # Configuration settings
+├── main.py                        # Entry point with legacy endpoints
+├── agent.py                       # Legacy agent logic (compatibility)
 ├── requirements.txt               # Python dependencies
 ├── pyproject.toml                 # Project configuration
 └── README.md                      # This file

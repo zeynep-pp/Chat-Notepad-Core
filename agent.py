@@ -1,5 +1,5 @@
 import re
-from llm_service import LLMService
+from app.services.llm_service import LLMService
 
 # Initialize LLM service
 llm_service = LLMService()

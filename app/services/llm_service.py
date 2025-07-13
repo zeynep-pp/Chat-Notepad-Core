@@ -1,6 +1,6 @@
 import openai
 from typing import Optional
-from config import Config
+from ..config.config import Config
 
 
 class LLMService:

@@ -1,6 +1,6 @@
 import re
 from .base_agent import BaseAgent
-from llm_service import LLMService
+from ..services.llm_service import LLMService
 
 class TextEditorAgent(BaseAgent):
     def __init__(self, name: str = "text_editor"):

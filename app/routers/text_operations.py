@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from ..models.requests import TextRequest, TextResponse
 from ..core.agent_manager import AgentManager
-from diff_utils import get_diff
+from ..utils.diff_utils import get_diff
 
 router = APIRouter(prefix="/api/v1", tags=["text"])
 

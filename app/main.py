@@ -2,8 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import text_operations
 from .models.requests import TextRequest, TextResponse
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from agent import process_command
-from diff_utils import get_diff
+from .utils.diff_utils import get_diff
 
 app = FastAPI(
     title="ChatNotePad.Ai Backend",

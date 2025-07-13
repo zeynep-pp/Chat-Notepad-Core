@@ -1,5 +1,5 @@
 from .base_agent import BaseAgent
-from llm_service import LLMService
+from ..services.llm_service import LLMService
 
 class SummarizerAgent(BaseAgent):
     def __init__(self, name: str = "summarizer"):

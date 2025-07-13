@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import text_operations
 from app.models.requests import TextRequest, TextResponse
 from agent import process_command
-from diff_utils import get_diff
+from app.utils.diff_utils import get_diff
 
 app = FastAPI(
     title="ChatNotePad.Ai Backend",
