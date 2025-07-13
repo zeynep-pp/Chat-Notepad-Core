@@ -249,3 +249,49 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - SentimentAnalyzerAgent (emotional tone analysis)
 - CodeFormatterAgent (code beautification)
 - GrammarCheckerAgent (writing assistance)
+
+## 🔮 Roadmap
+
+### 🟢 Phase 1: Core Infrastructure – ✅ Completed
+- ✅ FastAPI setup with async endpoints
+- ✅ `/prompt` endpoint with rule-based command processing
+- ✅ `TextEditorAgent` for transformations (remove, replace, capitalize)
+- ✅ HTML diff output using `diff-match-patch`
+- ✅ CORS support for frontend integration
+
+---
+
+### 🟡 Phase 2: LLM & Smart Agent Expansion – ✅ Completed
+- ✅ OpenAI GPT integration for natural language commands
+- ✅ `/summarize` endpoint with `SummarizerAgent`
+- ✅ Expand agent capabilities to handle diverse natural commands
+- ✅ Improve error handling and validation across agents 
+- ✅ Provide `agent_used` feedback in API responses
+- ✅ Advanced AI features: tone shift, simplification, rephrasing
+
+---
+
+### 🟣 Phase 3: Collaboration & Scalability – ⬜️ Not Started
+- ⬜️ Basic user authentication and personalized note storage
+- ⬜️ Version history and undo support
+- ⬜️ Real-time collaboration foundation
+- ⬜️ Multi-language command handling support
+- ⬜️ Team/collaborator management features
+- ⬜️ API rate limiting and quota management
+- ⬜️ Command history storage and retrieval API
+- ⬜️ Context-aware command suggestions based on user history
+- ⬜️ Export API endpoints (Markdown, TXT, PDF formats)
+- ⬜️ File import API endpoints (Markdown, TXT file parsing)
+- ⬜️ WebSocket support for real-time collaboration
+- ⬜️ Cloud storage integration APIs (Dropbox, Google Drive)
+- ⬜️ Plugin system backend architecture for custom commands
+- ⬜️ User settings and preferences storage
+- ⬜️ Advanced AI model integration options
+
+---
+
+### 💡 Future Enhancements
+- ⬜️ Agent analytics and usage logging
+- ⬜️ Custom agent loader (dynamic import system)
+- ⬜️ Support for additional agent types (Translator, Sentiment, Formatter)
+- ⬜️ More integration examples for different frontends
