@@ -1,5 +1,7 @@
-fastapi
-uvicorn
-openai
-diff-match-patch
-spacy 
+fastapi>=0.116.1
+uvicorn[standard]>=0.35.0
+pydantic>=2.0.0
+python-multipart>=0.0.6
+openai>=1.95.1
+diff-match-patch>=20241021
+python-dotenv>=1.0.0 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import text_operations
-from app.models.requests import TextRequest, TextResponse
+from .routers import text_operations
+from .models.requests import TextRequest, TextResponse
 from agent import process_command
 from diff_utils import get_diff
 
@@ -39,7 +39,7 @@ async def legacy_prompt(request: TextRequest):
 @app.post("/summarize", response_model=TextResponse)
 async def legacy_summarize(request: TextRequest):
     """Legacy endpoint that redirects to new summarizer agent"""
-    from app.core.agent_manager import AgentManager
+    from .core.agent_manager import AgentManager
     try:
         agent_manager = AgentManager()
         result = await agent_manager.execute("summarizer", request.text, request.command)
@@ -55,8 +55,4 @@ async def legacy_summarize(request: TextRequest):
 
 @app.get("/")
 async def root():
-    return {"message": "ChatNotePad.Ai Backend API", "version": "2.0.0", "status": "running"}
-
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
+    return {"message": "ChatNotePad.Ai Backend API", "version": "2.0.0"}
