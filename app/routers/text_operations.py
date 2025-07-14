@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from ..models.requests import TextRequest, TextResponse
+from ..models.requests import TextRequest, TextResponse, AgentInfo
 from ..core.agent_manager import AgentManager
 from ..utils.diff_utils import get_diff
 
@@ -20,7 +20,8 @@ async def process_text(
             result=result["result"],
             success=result["success"],
             agent_used=result["agent_used"],
-            diff=diff
+            diff=diff,
+            agent_info=AgentInfo(**result["agent_info"])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -37,7 +38,8 @@ async def summarize_text(
             result=result["result"],
             success=result["success"],
             agent_used=result["agent_used"],
-            diff=diff
+            diff=diff,
+            agent_info=AgentInfo(**result["agent_info"])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

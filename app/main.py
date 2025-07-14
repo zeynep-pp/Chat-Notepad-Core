@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import text_operations
-from .models.requests import TextRequest, TextResponse
+from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,16 +28,23 @@ app.include_router(text_operations.router)
 async def legacy_prompt(request: TextRequest):
     """Legacy endpoint for backward compatibility"""
     try:
-        result = process_command(request.text, request.command)
+        command_result = process_command(request.text, request.command)
+        result = command_result["result"]
+        agent_info = command_result["agent_info"]
+        
         diff = get_diff(request.text, result)
         return TextResponse(
             result=result,
             success=True,
             agent_used="legacy",
-            diff=diff
+            diff=diff,
+            agent_info=AgentInfo(**agent_info)
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        error_msg = f"Error processing command: {str(e)}"
+        print(f"Full traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @app.post("/summarize", response_model=TextResponse)
 async def legacy_summarize(request: TextRequest):
@@ -51,7 +58,8 @@ async def legacy_summarize(request: TextRequest):
             result=result["result"],
             success=result["success"],
             agent_used=result["agent_used"],
-            diff=diff
+            diff=diff,
+            agent_info=AgentInfo(**result["agent_info"])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

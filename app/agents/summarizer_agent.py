@@ -1,12 +1,17 @@
 from .base_agent import BaseAgent
 from ..services.llm_service import LLMService
+from typing import Dict, Any
+import time
+from datetime import datetime
 
 class SummarizerAgent(BaseAgent):
     def __init__(self, name: str = "summarizer"):
         super().__init__(name)
         self.llm_service = LLMService()
 
-    async def process(self, text: str, command: str) -> str:
+    async def process(self, text: str, command: str) -> Dict[str, Any]:
+        start_time = time.time()
+        
         try:
             system_prompt = """You are a text summarization specialist. Your task is to create concise, accurate summaries of the provided text.
 
@@ -47,9 +52,40 @@ Examples of summarization styles based on command:
                 max_tokens=1000
             )
             
+            end_time = time.time()
+            processing_time_ms = int((end_time - start_time) * 1000)
+            
             content = response.choices[0].message.content
-            return content.strip() if content else text
+            result = content.strip() if content else text
+            
+            # Extract usage information if available
+            tokens_used = None
+            if hasattr(response, 'usage') and response.usage:
+                tokens_used = response.usage.total_tokens
+            
+            return {
+                "result": result,
+                "agent_info": {
+                    "model": self.llm_service.model,
+                    "processing_time_ms": processing_time_ms,
+                    "tokens_used": tokens_used,
+                    "confidence_score": 0.95,
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
             
         except Exception as e:
+            end_time = time.time()
+            processing_time_ms = int((end_time - start_time) * 1000)
+            
             self.logger.error(f"Summarization failed: {e}")
-            return f"Error: Unable to summarize text - {str(e)}"
+            return {
+                "result": f"Error: Unable to summarize text - {str(e)}",
+                "agent_info": {
+                    "model": self.llm_service.model,
+                    "processing_time_ms": processing_time_ms,
+                    "tokens_used": None,
+                    "confidence_score": 0.0,
+                    "timestamp": datetime.now().isoformat()
+                }
+            }

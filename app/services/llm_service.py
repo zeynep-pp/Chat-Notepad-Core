@@ -1,6 +1,8 @@
 import openai
-from typing import Optional
+from typing import Optional, Dict, Any
 from ..config.config import Config
+import time
+from datetime import datetime
 
 
 class LLMService:
@@ -10,10 +12,13 @@ class LLMService:
         )
         self.model = Config.OPENAI_MODEL
     
-    def process_complex_command(self, text: str, command: str) -> str:
+    def process_complex_command(self, text: str, command: str) -> Dict[str, Any]:
         """
         Process complex commands using GPT-4.1 for context-aware text manipulation
+        Returns both the result and metadata for agent_info
         """
+        start_time = time.time()
+        
         try:
             system_prompt = """You are a text processing assistant. Given a text and a command, apply the command to transform the text.
             
@@ -40,12 +45,43 @@ Examples:
                 max_tokens=Config.OPENAI_MAX_TOKENS
             )
             
+            end_time = time.time()
+            processing_time_ms = int((end_time - start_time) * 1000)
+            
             content = response.choices[0].message.content
-            return content.strip() if content else text
+            result = content.strip() if content else text
+            
+            # Extract usage information if available
+            tokens_used = None
+            if hasattr(response, 'usage') and response.usage:
+                tokens_used = response.usage.total_tokens
+            
+            return {
+                "result": result,
+                "agent_info": {
+                    "model": self.model,
+                    "processing_time_ms": processing_time_ms,
+                    "tokens_used": tokens_used,
+                    "confidence_score": 0.95,  # Default confidence for successful processing
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
             
         except Exception as e:
+            end_time = time.time()
+            processing_time_ms = int((end_time - start_time) * 1000)
+            
             print(f"LLM processing error: {e}")
-            return text  # Return original text on error
+            return {
+                "result": text,  # Return original text on error
+                "agent_info": {
+                    "model": self.model,
+                    "processing_time_ms": processing_time_ms,
+                    "tokens_used": None,
+                    "confidence_score": 0.0,  # Low confidence for errors
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
     
     def should_use_llm(self, command: str) -> bool:
         """
