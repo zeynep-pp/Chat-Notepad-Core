@@ -4,6 +4,17 @@ from .routers import text_operations
 from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("Successfully loaded .env file")
+except ImportError:
+    print("python-dotenv not installed, using system environment variables")
+except Exception as e:
+    print(f"Error loading .env file: {e}")
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from agent import process_command
 from .utils.diff_utils import get_diff
@@ -28,6 +39,7 @@ app.include_router(text_operations.router)
 async def legacy_prompt(request: TextRequest):
     """Legacy endpoint for backward compatibility"""
     try:
+        print(f"Processing request: text='{request.text}', command='{request.command}'")
         command_result = process_command(request.text, request.command)
         result = command_result["result"]
         agent_info = command_result["agent_info"]
@@ -43,6 +55,7 @@ async def legacy_prompt(request: TextRequest):
     except Exception as e:
         import traceback
         error_msg = f"Error processing command: {str(e)}"
+        print(f"ERROR: {error_msg}")
         print(f"Full traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=error_msg)
 

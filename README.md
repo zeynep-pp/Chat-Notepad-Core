@@ -274,6 +274,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ Improve error handling and validation across agents 
 - ✅ Provide `agent_used` feedback in API responses
 - ✅ Advanced AI features: tone shift, simplification, rephrasing
+- ✅ Feedback display for agent response (e.g. "Processed by GPT") 
 
 ---
 
