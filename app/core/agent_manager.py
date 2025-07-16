@@ -2,15 +2,24 @@ from typing import Dict
 from ..agents.base_agent import BaseAgent
 from ..agents.text_editor_agent import TextEditorAgent
 from ..agents.summarizer_agent import SummarizerAgent
+from .langgraph_workflow import LangGraphWorkflow
 
 class AgentManager:
-    def __init__(self):
+    def __init__(self, use_langgraph: bool = True):
+        self.use_langgraph = use_langgraph
         self.agents: Dict[str, BaseAgent] = {
             "editor": TextEditorAgent("editor"),
             "summarizer": SummarizerAgent("summarizer")
         }
+        if use_langgraph:
+            self.workflow = LangGraphWorkflow()
 
     async def execute(self, agent_name: str, text: str, command: str) -> Dict:
+        # Use LangGraph workflow if enabled
+        if self.use_langgraph:
+            return await self.workflow.execute(text, command)
+        
+        # Fall back to legacy agent execution
         agent = self.agents.get(agent_name)
         if not agent:
             raise ValueError(f"Agent '{agent_name}' not found")

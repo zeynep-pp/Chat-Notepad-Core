@@ -181,6 +181,40 @@ Legacy endpoint that redirects to the new summarizer agent.
 - **TextEditorAgent**: Handles text transformations (uppercase, replace, etc.)
 - **SummarizerAgent**: AI-powered text summarization with various styles
 
+### LangGraph & LangChain Integration
+
+The project leverages **LangGraph** for advanced workflow orchestration and **LangChain** for enhanced AI capabilities:
+
+#### LangGraph Workflow Features:
+- **State Management**: Robust state tracking through `WorkflowState` with error handling
+- **Conditional Routing**: Smart agent selection based on command analysis
+- **Error Recovery**: Built-in error handling and fallback mechanisms
+- **Async Processing**: Full async support for scalable operations
+
+#### Workflow Architecture:
+```python
+# app/core/langgraph_workflow.py
+class LangGraphWorkflow:
+    def __init__(self):
+        self.workflow = self._create_workflow()
+    
+    async def execute(self, text: str, command: str) -> Dict[str, Any]:
+        # Orchestrates agent execution through LangGraph
+```
+
+#### Key Benefits:
+- **Scalable**: Easy to add new agents and workflow steps
+- **Reliable**: Comprehensive error handling and state management
+- **Extensible**: Built for complex multi-agent coordination
+- **Testable**: Full test coverage for workflow logic
+
+#### Usage Example:
+```python
+workflow = LangGraphWorkflow()
+result = await workflow.execute("Hello world", "uppercase")
+# Returns: {"result": "HELLO WORLD", "success": True, "agent_used": "editor"}
+```
+
 ---
 
 ## 📁 Project Structure
@@ -199,7 +233,8 @@ backend/
 │   │   └── summarizer_agent.py    # Summarization logic
 │   ├── core/
 │   │   ├── __init__.py
-│   │   └── agent_manager.py       # Agent orchestration
+│   │   ├── agent_manager.py       # Agent orchestration
+│   │   └── langgraph_workflow.py  # LangGraph workflow orchestration
 │   ├── routers/
 │   │   ├── __init__.py
 │   │   └── text_operations.py     # API endpoints
@@ -212,9 +247,19 @@ backend/
 │   └── config/
 │       ├── __init__.py
 │       └── config.py              # Configuration settings
+├── tests/                         # Test suite
+│   ├── __init__.py
+│   ├── conftest.py                # Pytest configuration
+│   ├── unit/                      # Unit tests
+│   │   ├── __init__.py
+│   │   └── test_langgraph_workflow.py
+│   └── integration/               # Integration tests
+│       ├── __init__.py
+│       └── test_text_operations.py
 ├── main.py                        # Entry point with legacy endpoints
 ├── agent.py                       # Legacy agent logic (compatibility)
 ├── requirements.txt               # Python dependencies
+├── pytest.ini                     # Pytest configuration
 ├── pyproject.toml                 # Project configuration
 └── README.md                      # This file
 ```
@@ -274,7 +319,10 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ Improve error handling and validation across agents 
 - ✅ Provide `agent_used` feedback in API responses
 - ✅ Advanced AI features: tone shift, simplification, rephrasing
-- ✅ Feedback display for agent response (e.g. "Processed by GPT") 
+- ✅ Feedback display for agent response (e.g. "Processed by GPT")
+- ✅ LangGraph integration for advanced workflow orchestration and multi-agent coordination
+- ✅ Unit and integration test coverage for LangGraph workflow and API endpoints
+- ✅ Comprehensive test suite with pytest for reliability and maintainability 
 
 ---
 
@@ -302,3 +350,35 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ⬜️ Custom agent loader (dynamic import system)
 - ⬜️ Support for additional agent types (Translator, Sentiment, Formatter)
 - ⬜️ More integration examples for different frontends
+
+## Troubleshooting
+
+<details>
+<summary>Import Error: "langgraph.graph" could not be resolved</summary>
+
+If you encounter import errors in your IDE while the package works in terminal:
+
+1. **Configure Python Interpreter:**
+   - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
+   - Type "Python: Select Interpreter" and select it
+   - Choose `/usr/bin/python3`
+
+2. **Create workspace settings** (`.vscode/settings.json`):
+   ```json
+   {
+       "python.defaultInterpreterPath": "/usr/bin/python3"
+   }
+   ```
+
+3. **Restart your IDE** completely
+
+4. **Alternative: Use virtual environment:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install langgraph
+   ```
+
+5. **For Cursor users:** Try "Developer: Reload Window" from command palette
+
+</details>

@@ -26,9 +26,10 @@ async def legacy_prompt(request: TextRequest):
     """Legacy endpoint for backward compatibility"""
     try:
         result = process_command(request.text, request.command)
-        diff = get_diff(request.text, result)
+        result_str = result["result"]  # adjust key as needed
+        diff = get_diff(request.text, result_str)
         return TextResponse(
-            result=result,
+            result=result_str,
             success=True,
             agent_used="legacy",
             diff=diff
