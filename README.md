@@ -171,7 +171,13 @@ Legacy endpoint that redirects to the new summarizer agent.
    python3 -m uvicorn main:app --reload
    ```
 
-5. **Test the endpoints:**
+5. **Access the API documentation:**
+   Open your browser and visit the interactive Swagger UI at:
+   ```
+   http://127.0.0.1:8000/docs
+   ```
+
+6. **Test the endpoints:**
    
    **Text Editing:**
    ```sh
