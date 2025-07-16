@@ -2,6 +2,7 @@ from typing import Dict
 from ..agents.base_agent import BaseAgent
 from ..agents.text_editor_agent import TextEditorAgent
 from ..agents.summarizer_agent import SummarizerAgent
+from ..agents.transformer_agent import TransformerAgent
 from .langgraph_workflow import LangGraphWorkflow
 
 class AgentManager:
@@ -9,7 +10,8 @@ class AgentManager:
         self.use_langgraph = use_langgraph
         self.agents: Dict[str, BaseAgent] = {
             "editor": TextEditorAgent("editor"),
-            "summarizer": SummarizerAgent("summarizer")
+            "summarizer": SummarizerAgent("summarizer"),
+            "transformer": TransformerAgent("transformer")
         }
         if use_langgraph:
             self.workflow = LangGraphWorkflow()

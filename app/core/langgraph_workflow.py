@@ -2,6 +2,7 @@ from typing import Dict, Any, TypedDict, Optional
 from langgraph.graph import StateGraph, START, END
 from ..agents.text_editor_agent import TextEditorAgent
 from ..agents.summarizer_agent import SummarizerAgent
+from ..agents.transformer_agent import TransformerAgent
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ class LangGraphWorkflow:
     def __init__(self):
         self.text_editor = TextEditorAgent("editor")
         self.summarizer = SummarizerAgent("summarizer")
+        self.transformer = TransformerAgent("transformer")
         self.workflow = self._create_workflow()
     
     def _create_workflow(self):
@@ -28,6 +30,7 @@ class LangGraphWorkflow:
         workflow.add_node("router", self._route_request)
         workflow.add_node("text_editor", self._process_text_editor)
         workflow.add_node("summarizer", self._process_summarizer)
+        workflow.add_node("transformer", self._process_transformer)
         workflow.add_node("error_handler", self._handle_error)
         
         # Add edges
@@ -38,11 +41,13 @@ class LangGraphWorkflow:
             {
                 "editor": "text_editor",
                 "summarizer": "summarizer",
+                "transformer": "transformer",
                 "error": "error_handler"
             }
         )
         workflow.add_edge("text_editor", END)
         workflow.add_edge("summarizer", END)
+        workflow.add_edge("transformer", END)
         workflow.add_edge("error_handler", END)
         
         return workflow.compile()
@@ -56,13 +61,23 @@ class LangGraphWorkflow:
         """Decide which agent to use based on command"""
         command_lower = state["command"].lower()
         
-        if any(keyword in command_lower for keyword in ["summarize", "summary", "brief"]):
+        # Check for transformation keywords first (most specific)
+        transformation_keywords = [
+            'formal', 'formalize', 'professional', 'business', 'official',
+            'simplify', 'simple', 'simpler', 'easier', 'easy', 'beginner',
+            'basic', 'plain', 'layman', 'tone', 'casual', 'friendly',
+            'warm', 'conversational', 'informal', 'transform'
+        ]
+        
+        if any(keyword in command_lower for keyword in transformation_keywords):
+            return "transformer"
+        elif any(keyword in command_lower for keyword in ["summarize", "summary", "brief"]):
             return "summarizer"
         elif any(keyword in command_lower for keyword in ["edit", "replace", "remove", "uppercase", "lowercase", "capitalize"]):
             return "editor"
         else:
-            # Default to editor for general text processing
-            return "editor"
+            # Default to transformer for general text processing (most flexible)
+            return "transformer"
     
     async def _process_text_editor(self, state: WorkflowState) -> WorkflowState:
         """Process text using text editor agent"""
@@ -112,6 +127,32 @@ class LangGraphWorkflow:
                 **state,
                 "result": f"Error: {str(e)}",
                 "agent_used": self.summarizer.name,
+                "success": False,
+                "error": str(e)
+            }
+    
+    async def _process_transformer(self, state: WorkflowState) -> WorkflowState:
+        """Process text using transformer agent"""
+        try:
+            if not await self.transformer.validate_input(state["text"], state["command"]):
+                raise ValueError("Invalid input for transformer")
+            
+            result = await self.transformer.process(state["text"], state["command"])
+            
+            return {
+                **state,
+                "result": result["result"],
+                "agent_used": self.transformer.name,
+                "agent_info": result["agent_info"],
+                "success": True,
+                "error": None
+            }
+        except Exception as e:
+            logger.error(f"Transformer processing failed: {e}")
+            return {
+                **state,
+                "result": f"Error: {str(e)}",
+                "agent_used": self.transformer.name,
                 "success": False,
                 "error": str(e)
             }

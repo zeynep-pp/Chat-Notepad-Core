@@ -11,6 +11,7 @@ class AgentInfo(BaseModel):
     tokens_used: Optional[int] = None
     confidence_score: Optional[float] = None
     timestamp: str
+    transformation_type: Optional[str] = None
 
 class TextResponse(BaseModel):
     result: str

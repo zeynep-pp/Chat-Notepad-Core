@@ -25,9 +25,11 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 - **Multi-Agent System**: Specialized agents for different tasks
 - **AI-Powered**: OpenAI integration for intelligent text processing
 - **Text Editing**: Rule-based and AI-powered text transformations
+- **Advanced Text Transformation**: Formalization, simplification, and tone shifting ✨ NEW
 - **Text Summarization**: AI-powered summarization with different styles
 - **Visual Diff**: HTML diff output for frontend integration
 - **RESTful API**: Clean REST endpoints with proper error handling
+- **Comprehensive Testing**: Full test coverage with pytest
 - **Extensible**: Easy to add new agents and capabilities
 - **CORS Enabled**: Ready for frontend integration
 
@@ -51,9 +53,46 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
   "result": "Hello how are you? Today is a beautiful day isn't it?",
   "success": true,
   "agent_used": "editor",
-  "diff": "<span>Hello</span><del>,</del><span> how are you? Today is a beautiful day</span><del>,</del><span> isn't it?</span>"
+  "diff": "<span>Hello</span><del>,</del><span> how are you? Today is a beautiful day</span><del>,</del><span> isn't it?</span>",
+  "agent_info": {
+    "model": "rule-based",
+    "processing_time_ms": 5,
+    "confidence_score": 1.0,
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
 }
 ```
+
+#### POST `/api/v1/transform` - Advanced Text Transformation ✨ NEW
+**Request:**
+```json
+{
+  "text": "hey there! hope you're doing well",
+  "command": "Make this more formal"
+}
+```
+**Response:**
+```json
+{
+  "result": "Good morning. I hope this message finds you well.",
+  "success": true,
+  "agent_used": "transformer",
+  "diff": "<span>Good morning. I hope this message finds you well.</span>",
+  "agent_info": {
+    "model": "text-transformation-agent",
+    "processing_time_ms": 1250,
+    "tokens_used": 450,
+    "confidence_score": 0.95,
+    "timestamp": "2024-01-15T10:30:00Z",
+    "transformation_type": "formalization"
+  }
+}
+```
+
+**Supported Transformations:**
+- **Formalization**: `formal`, `formalize`, `professional`, `business`, `official`
+- **Simplification**: `simplify`, `simple`, `easier`, `beginner`, `layman`
+- **Tone Shift**: `tone`, `casual`, `friendly`, `warm`, `conversational`
 
 #### POST `/api/v1/summarize` - AI Summarization
 **Request:**
@@ -69,7 +108,14 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
   "result": "A concise summary of the main points from the original text.",
   "success": true,
   "agent_used": "summarizer",
-  "diff": "..."
+  "diff": "...",
+  "agent_info": {
+    "model": "gpt-4o",
+    "processing_time_ms": 1800,
+    "tokens_used": 320,
+    "confidence_score": 0.92,
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
 }
 ```
 
@@ -77,7 +123,7 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 **Response:**
 ```json
 {
-  "agents": ["editor", "summarizer"]
+  "agents": ["editor", "summarizer", "transformer"]
 }
 ```
 
@@ -140,6 +186,13 @@ Legacy endpoint that redirects to the new summarizer agent.
      -H "Content-Type: application/json" \
      -d '{"text": "Long text here...", "command": "summarize"}'
    ```
+   
+   **Text Transformation:**
+   ```sh
+   curl -X POST "http://127.0.0.1:8000/api/v1/transform" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "hey there! hope you are doing well", "command": "make this more formal"}'
+   ```
 
 ---
 
@@ -180,6 +233,10 @@ Legacy endpoint that redirects to the new summarizer agent.
 
 - **TextEditorAgent**: Handles text transformations (uppercase, replace, etc.)
 - **SummarizerAgent**: AI-powered text summarization with various styles
+- **TransformerAgent**: Advanced text transformation with specialized prompts ✨ NEW
+  - Formalization (casual → formal)
+  - Simplification (complex → simple)
+  - Tone shifting (formal → friendly)
 
 ### LangGraph & LangChain Integration
 
@@ -230,7 +287,8 @@ backend/
 │   │   ├── __init__.py
 │   │   ├── base_agent.py          # Abstract base class
 │   │   ├── text_editor_agent.py   # Text editing logic
-│   │   └── summarizer_agent.py    # Summarization logic
+│   │   ├── summarizer_agent.py    # Summarization logic
+│   │   └── transformer_agent.py   # Advanced text transformation ✨ NEW
 │   ├── core/
 │   │   ├── __init__.py
 │   │   ├── agent_manager.py       # Agent orchestration
@@ -252,10 +310,14 @@ backend/
 │   ├── conftest.py                # Pytest configuration
 │   ├── unit/                      # Unit tests
 │   │   ├── __init__.py
-│   │   └── test_langgraph_workflow.py
+│   │   ├── test_langgraph_workflow.py
+│   │   ├── test_transformer_agent.py         # TransformerAgent tests ✨ NEW
+│   │   ├── test_transform_error_handling.py  # Error handling tests ✨ NEW
+│   │   └── test_langgraph_transformer.py     # LangGraph integration tests ✨ NEW
 │   └── integration/               # Integration tests
 │       ├── __init__.py
-│       └── test_text_operations.py
+│       ├── test_text_operations.py
+│       └── test_transform_endpoint_simple.py # Transform endpoint tests ✨ NEW
 ├── main.py                        # Entry point with legacy endpoints
 ├── agent.py                       # Legacy agent logic (compatibility)
 ├── requirements.txt               # Python dependencies
@@ -277,6 +339,14 @@ backend/
 - **Multiple styles**: Brief, detailed, bullet points, executive summary
 - **AI-powered**: Uses OpenAI GPT for intelligent summarization
 - **Context-aware**: Maintains original tone and important information
+
+### Transformer Agent ✨ NEW
+- **Formalization**: Convert casual text to professional language
+- **Simplification**: Transform complex text into simple, accessible language
+- **Tone Shifting**: Adjust text tone (formal ↔ casual, professional ↔ friendly)
+- **Intelligent Routing**: Automatically detects transformation type from commands
+- **Specialized Prompts**: Tailored LLM prompts for each transformation type
+- **Error Resilience**: Comprehensive error handling and fallback mechanisms
 
 ---
 
@@ -300,6 +370,8 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - SentimentAnalyzerAgent (emotional tone analysis)
 - CodeFormatterAgent (code beautification)
 - GrammarCheckerAgent (writing assistance)
+- FactCheckerAgent (content verification)
+- StyleGuideAgent (brand voice consistency)
 
 ## 🔮 Roadmap
 
@@ -322,7 +394,12 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ Feedback display for agent response (e.g. "Processed by GPT")
 - ✅ LangGraph integration for advanced workflow orchestration and multi-agent coordination
 - ✅ Unit and integration test coverage for LangGraph workflow and API endpoints
-- ✅ Comprehensive test suite with pytest for reliability and maintainability 
+- ✅ Comprehensive test suite with pytest for reliability and maintainability
+- ✅ **NEW: `/transform` endpoint with TransformerAgent**
+- ✅ **NEW: Advanced text transformation capabilities (formalization, simplification, tone shift)**
+- ✅ **NEW: Intelligent command detection and specialized prompts**
+- ✅ **NEW: Enhanced agent_info response with transformation_type metadata**
+- ✅ **NEW: Comprehensive test coverage for transformation functionality (60+ tests)** 
 
 ---
 
@@ -350,6 +427,47 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ⬜️ Custom agent loader (dynamic import system)
 - ⬜️ Support for additional agent types (Translator, Sentiment, Formatter)
 - ⬜️ More integration examples for different frontends
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+The project includes comprehensive test coverage to ensure reliability and maintainability:
+
+### Test Structure
+```
+tests/
+├── unit/                                    # Unit tests (53 tests)
+│   ├── test_transformer_agent.py          # TransformerAgent core functionality
+│   ├── test_transform_error_handling.py   # Error handling and edge cases
+│   └── test_langgraph_transformer.py      # LangGraph workflow integration
+└── integration/                            # Integration tests (7 tests)
+    └── test_transform_endpoint_simple.py  # API endpoint testing
+```
+
+### Test Coverage
+- **TransformerAgent**: Command detection, prompt generation, processing logic
+- **Error Handling**: API failures, network issues, malformed responses
+- **LangGraph Integration**: Workflow routing, agent coordination
+- **Endpoint Testing**: Input validation, response structure, error scenarios
+
+### Running Tests
+```bash
+# Run all transformer-related tests
+python3 -m pytest tests/unit/test_transformer_agent.py tests/unit/test_transform_error_handling.py tests/unit/test_langgraph_transformer.py -v
+
+# Run integration tests
+python3 -m pytest tests/integration/test_transform_endpoint_simple.py -v
+
+# Run specific test categories
+python3 -m pytest tests/unit/test_transformer_agent.py::TestTransformerAgent::test_detect_transformation_type_formalization -v
+```
+
+### Test Features
+- **Mocking**: Comprehensive mocking of OpenAI API calls
+- **Edge Cases**: Handling of None inputs, special characters, boundary conditions
+- **Error Scenarios**: Network failures, API errors, malformed responses
+- **Performance**: Processing time and token usage validation
 
 ## Troubleshooting
 
