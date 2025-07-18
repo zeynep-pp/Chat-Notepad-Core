@@ -588,7 +588,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 
 ---
 
-### 🟣 Phase 3: Collaboration & Scalability – ⬜️ Not Started
+### 🟣 Phase 3: Collaboration & Scalability – **🚧 In Progress**
 - ✅ **Supabase integration for user authentication**
 - ✅ **User registration and sign-in endpoints** 
 - ✅ **Email verification workflow with confirmation endpoint**
