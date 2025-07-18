@@ -1,9 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import text_operations
+from .routers import text_operations, auth
 from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 try:
@@ -34,6 +39,18 @@ app.add_middleware(
 )
 
 app.include_router(text_operations.router)
+
+# Add error handling for auth router
+try:
+    app.include_router(auth.router)
+    logger.info("✅ Auth router loaded successfully")
+    logger.info(f"🔧 Auth router prefix: {auth.router.prefix}")
+    logger.info(f"🔧 Auth router routes: {len(auth.router.routes)}")
+except Exception as e:
+    logger.error(f"❌ Failed to load auth router: {e}")
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+    raise
 
 @app.post("/prompt", response_model=TextResponse)
 async def legacy_prompt(request: TextRequest):

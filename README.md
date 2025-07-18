@@ -27,6 +27,9 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 - **Text Editing**: Rule-based and AI-powered text transformations
 - **Advanced Text Transformation**: Formalization, simplification, and tone shifting ✨ NEW
 - **Text Summarization**: AI-powered summarization with different styles
+- **User Authentication**: Supabase-powered authentication and user management ✨ NEW
+- **Email Verification**: Automated email confirmation workflow ✨ NEW
+- **User Preferences**: Personalized settings and preferences storage ✨ NEW
 - **Visual Diff**: HTML diff output for frontend integration
 - **RESTful API**: Clean REST endpoints with proper error handling
 - **Comprehensive Testing**: Full test coverage with pytest
@@ -142,6 +145,7 @@ Legacy endpoint that redirects to the new summarizer agent.
 ### Prerequisites
 - Python 3.11.6 or higher
 - OpenAI API key (for AI features)
+- Supabase project (for authentication and user management)
 
 ### Installation
 1. **Clone the repository:**
@@ -160,15 +164,25 @@ Legacy endpoint that redirects to the new summarizer agent.
 3. **Environment setup:**
    Create a `.env` file or set environment variables:
    ```env
+   # OpenAI Configuration
    OPENAI_API_KEY=your_openai_api_key_here
    OPENAI_MODEL=gpt-4o-mini
    OPENAI_TEMPERATURE=0.7
    OPENAI_MAX_TOKENS=1000
+   
+   # Supabase Configuration
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   SUPABASE_SERVICE_KEY=your_supabase_service_key_here
+   
+   # JWT Configuration
+   JWT_SECRET=your_jwt_secret_key_here
+   JWT_EXPIRATION_HOURS=24
    ```
 
 4. **Run the server:**
    ```sh
-   python3 -m uvicorn main:app --reload
+   python3 -m uvicorn app.main:app --reload
    ```
 
 5. **Access the API documentation:**
@@ -177,7 +191,26 @@ Legacy endpoint that redirects to the new summarizer agent.
    http://127.0.0.1:8000/docs
    ```
 
-6. **Test the endpoints:**
+6. **Build and test the project:**
+   
+   **Install dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+   
+   **Run tests:**
+   ```sh
+   python3 -m pytest tests/ -v
+   ```
+   
+   **Check code syntax:**
+   ```sh
+   python3 -m py_compile app/main.py
+   python3 -m py_compile app/routers/auth.py
+   python3 -m py_compile app/services/auth_service.py
+   ```
+
+7. **Test the endpoints:**
    
    **Text Editing:**
    ```sh
@@ -199,6 +232,140 @@ Legacy endpoint that redirects to the new summarizer agent.
      -H "Content-Type: application/json" \
      -d '{"text": "hey there! hope you are doing well", "command": "make this more formal"}'
    ```
+   
+   **Authentication:**
+   ```sh
+   curl -X POST "http://127.0.0.1:8000/auth/signup" \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password123", "full_name": "Test User"}'
+   ```
+
+---
+
+## 🔐 Authentication & User Management
+
+### Supabase Integration
+
+The backend now includes comprehensive authentication and user management powered by **Supabase**:
+
+#### Key Features:
+- **User Registration & Sign-in**: Secure email/password authentication
+- **Email Verification**: Automated email confirmation workflow
+- **Password Reset**: Secure password reset with email tokens
+- **User Profiles**: Full name, email, verification status management
+- **User Preferences**: Theme, language, and application settings
+- **Account Management**: Profile updates and account deletion
+
+#### Authentication Endpoints:
+
+**POST `/auth/signup`** - User Registration
+```json
+{
+  "email": "user@example.com",
+  "password": "secure_password",
+  "full_name": "John Doe"
+}
+```
+
+**POST `/auth/signin`** - User Sign-in
+```json
+{
+  "email": "user@example.com",
+  "password": "secure_password"
+}
+```
+
+**POST `/auth/confirm-email`** - Email Confirmation ✨ NEW
+```json
+{
+  "token": "supabase_jwt_access_token"
+}
+```
+
+**POST `/auth/reset-password`** - Password Reset Request
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**POST `/auth/update-password`** - Password Update
+```json
+{
+  "token": "reset_token_from_email",
+  "new_password": "new_secure_password"
+}
+```
+
+**GET `/auth/me`** - Get Current User Profile
+```json
+{
+  "id": "user_uuid",
+  "email": "user@example.com",
+  "full_name": "John Doe",
+  "email_verified": true,
+  "created_at": "2024-01-01T00:00:00Z",
+  "updated_at": "2024-01-01T00:00:00Z"
+}
+```
+
+**PUT `/auth/me`** - Update User Profile
+```json
+{
+  "full_name": "John Updated Doe",
+  "email": "new_email@example.com"
+}
+```
+
+**GET `/auth/preferences`** - Get User Preferences
+```json
+{
+  "theme": "dark",
+  "language": "en",
+  "editor_settings": {},
+  "command_history_enabled": true,
+  "auto_save_enabled": true
+}
+```
+
+**PUT `/auth/preferences`** - Update User Preferences
+```json
+{
+  "preferences": {
+    "theme": "dark",
+    "language": "en",
+    "editor_settings": {"fontSize": 14},
+    "command_history_enabled": true,
+    "auto_save_enabled": true
+  }
+}
+```
+
+#### Security Features:
+- **JWT Authentication**: Secure token-based authentication
+- **Email Verification**: Required before sign-in
+- **Password Reset**: Secure token-based password reset
+- **Admin Operations**: Service key for admin-level operations
+- **Input Validation**: Comprehensive request validation
+- **Error Handling**: Consistent error responses
+
+#### Database Schema:
+```sql
+-- User preferences table
+CREATE TABLE user_preferences (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    preferences JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+#### Frontend Integration:
+- **React Authentication**: Easy integration with React contexts
+- **Protected Routes**: JWT-based route protection
+- **User State Management**: Persistent user session handling
+- **Error Boundaries**: Graceful authentication error handling
 
 ---
 
@@ -288,7 +455,8 @@ backend/
 │   ├── main.py                    # FastAPI app entry point (new API)
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── requests.py            # Pydantic request/response models
+│   │   ├── requests.py            # Pydantic request/response models
+│   │   └── auth.py                # Authentication models ✨ NEW
 │   ├── agents/
 │   │   ├── __init__.py
 │   │   ├── base_agent.py          # Abstract base class
@@ -301,16 +469,24 @@ backend/
 │   │   └── langgraph_workflow.py  # LangGraph workflow orchestration
 │   ├── routers/
 │   │   ├── __init__.py
-│   │   └── text_operations.py     # API endpoints
+│   │   ├── text_operations.py     # API endpoints
+│   │   └── auth.py                # Authentication endpoints ✨ NEW
 │   ├── services/
 │   │   ├── __init__.py
-│   │   └── llm_service.py         # OpenAI integration
+│   │   ├── llm_service.py         # OpenAI integration
+│   │   └── auth_service.py        # Supabase authentication service ✨ NEW
+│   ├── middleware/
+│   │   ├── __init__.py
+│   │   └── auth_middleware.py     # JWT authentication middleware ✨ NEW
 │   ├── utils/
 │   │   ├── __init__.py
 │   │   └── diff_utils.py          # Diff calculation utilities
 │   └── config/
 │       ├── __init__.py
-│       └── config.py              # Configuration settings
+│       ├── config.py              # Configuration settings
+│       └── supabase.py            # Supabase configuration ✨ NEW
+├── database/
+│   └── schema.sql                 # Database schema for Supabase ✨ NEW
 ├── tests/                         # Test suite
 │   ├── __init__.py
 │   ├── conftest.py                # Pytest configuration
@@ -326,9 +502,12 @@ backend/
 │       └── test_transform_endpoint_simple.py # Transform endpoint tests ✨ NEW
 ├── main.py                        # Entry point with legacy endpoints
 ├── agent.py                       # Legacy agent logic (compatibility)
+├── test_auth.py                   # Authentication testing script ✨ NEW
+├── test_email_confirm.py          # Email confirmation testing script ✨ NEW
 ├── requirements.txt               # Python dependencies
 ├── pytest.ini                     # Pytest configuration
 ├── pyproject.toml                 # Project configuration
+├── SUPABASE_SETUP.md              # Supabase setup instructions ✨ NEW
 └── README.md                      # This file
 ```
 
@@ -410,7 +589,15 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 ---
 
 ### 🟣 Phase 3: Collaboration & Scalability – ⬜️ Not Started
-- ⬜️ Basic user authentication and personalized note storage
+- ✅ **Supabase integration for user authentication**
+- ✅ **User registration and sign-in endpoints** 
+- ✅ **Email verification workflow with confirmation endpoint**
+- ✅ **Password reset functionality with secure token handling**
+- ✅ **User profile management (view, update, delete)**
+- ✅ **User preferences storage and management**
+- ✅ **JWT-based authentication middleware**
+- ✅ **Comprehensive auth error handling and validation**
+- ⬜️ Personalized note storage
 - ⬜️ Version history and undo support
 - ⬜️ Real-time collaboration foundation
 - ⬜️ Multi-language command handling support
@@ -423,7 +610,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ⬜️ WebSocket support for real-time collaboration
 - ⬜️ Cloud storage integration APIs (Dropbox, Google Drive)
 - ⬜️ Plugin system backend architecture for custom commands
-- ⬜️ User settings and preferences storage
+- ✅ User settings and preferences storage
 - ⬜️ Advanced AI model integration options
 
 ---

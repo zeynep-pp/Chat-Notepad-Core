@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
+from typing import Dict, Any, Optional
 from ..models.requests import TextRequest, TextResponse, AgentInfo
 from ..core.agent_manager import AgentManager
 from ..utils.diff_utils import get_diff
+from ..middleware.auth_middleware import get_current_user, get_optional_user
 
 router = APIRouter(prefix="/api/v1", tags=["text"])
 
@@ -11,7 +13,8 @@ async def get_agent_manager() -> AgentManager:
 @router.post("/prompt", response_model=TextResponse)
 async def process_text(
     request: TextRequest,
-    agent_manager: AgentManager = Depends(get_agent_manager)
+    agent_manager: AgentManager = Depends(get_agent_manager),
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     try:
         result = await agent_manager.execute("editor", request.text, request.command)
@@ -29,7 +32,8 @@ async def process_text(
 @router.post("/summarize", response_model=TextResponse)
 async def summarize_text(
     request: TextRequest,
-    agent_manager: AgentManager = Depends(get_agent_manager)
+    agent_manager: AgentManager = Depends(get_agent_manager),
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     try:
         result = await agent_manager.execute("summarizer", request.text, request.command)
@@ -47,7 +51,8 @@ async def summarize_text(
 @router.post("/transform", response_model=TextResponse)
 async def transform_text(
     request: TextRequest,
-    agent_manager: AgentManager = Depends(get_agent_manager)
+    agent_manager: AgentManager = Depends(get_agent_manager),
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Advanced text transformation endpoint supporting:
@@ -90,5 +95,9 @@ async def transform_text(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/agents")
-async def list_agents(agent_manager: AgentManager = Depends(get_agent_manager)):
+async def list_agents(
+    agent_manager: AgentManager = Depends(get_agent_manager),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    # Public endpoint, authentication optional
     return {"agents": agent_manager.get_available_agents()}
