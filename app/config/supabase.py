@@ -56,3 +56,6 @@ class SupabaseConfig:
 
 # Global instance
 supabase_config = SupabaseConfig()
+
+# Export client for easy import
+supabase_client = supabase_config.get_client()

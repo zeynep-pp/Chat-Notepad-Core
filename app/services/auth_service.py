@@ -134,15 +134,32 @@ class AuthService:
     async def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Verify JWT token and return user data"""
         try:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"🔐 Verifying token: {token[:20]}...")
+            
             user_response = self.supabase.auth.get_user(token)
+            logger.info(f"🔐 Supabase response: {user_response}")
+            
             if user_response.user:
-                return {
+                user_data = {
                     "id": user_response.user.id,
+                    "sub": user_response.user.id,  # Add 'sub' field for compatibility
                     "email": user_response.user.email,
-                    "full_name": user_response.user.user_metadata.get("full_name")
+                    "full_name": user_response.user.user_metadata.get("full_name"),
+                    "created_at": user_response.user.created_at,
+                    "updated_at": user_response.user.updated_at,
+                    "email_verified": user_response.user.email_confirmed_at is not None
                 }
+                logger.info(f"✅ Token verified successfully for user: {user_data['email']}")
+                return user_data
+            
+            logger.warning("⚠️ Token verification failed: No user found")
             return None
-        except Exception:
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"❌ Token verification error: {str(e)}")
             return None
     
     async def refresh_token(self, refresh_token: str) -> TokenResponse:

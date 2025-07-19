@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import text_operations, auth
+from .routers import text_operations, auth, notes
 from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
@@ -32,9 +32,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -48,6 +48,16 @@ try:
     logger.info(f"🔧 Auth router routes: {len(auth.router.routes)}")
 except Exception as e:
     logger.error(f"❌ Failed to load auth router: {e}")
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+    raise
+
+# Add notes router
+try:
+    app.include_router(notes.router)
+    logger.info("✅ Notes router loaded successfully")
+except Exception as e:
+    logger.error(f"❌ Failed to load notes router: {e}")
     import traceback
     logger.error(f"❌ Full traceback: {traceback.format_exc()}")
     raise

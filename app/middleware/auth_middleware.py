@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 
 from ..services.auth_service import auth_service
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 class AuthMiddleware:
     def __init__(self):
@@ -12,9 +12,16 @@ class AuthMiddleware:
     
     async def get_current_user(
         self, 
-        credentials: HTTPAuthorizationCredentials = Depends(security)
+        credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
     ) -> Dict[str, Any]:
         """Get current authenticated user"""
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing authentication token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
         token = credentials.credentials
         user_data = await self.auth_service.verify_token(token)
         
@@ -43,7 +50,7 @@ auth_middleware = AuthMiddleware()
 
 # Helper functions for dependency injection
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> Dict[str, Any]:
     """Dependency to get current authenticated user"""
     return await auth_middleware.get_current_user(credentials)

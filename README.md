@@ -66,6 +66,56 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 }
 ```
 
+#### POST `/api/v1/notes` - Note Storage ✨ NEW
+**Request:**
+```json
+{
+  "title": "My Important Note",
+  "content": "This is the content of my note...",
+  "is_favorite": false,
+  "tags": ["work", "important"]
+}
+```
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "title": "My Important Note",
+  "content": "This is the content of my note...",
+  "is_favorite": false,
+  "tags": ["work", "important"],
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z",
+  "user_id": "user123"
+}
+```
+
+#### GET `/api/v1/notes` - List User Notes ✨ NEW
+**Query Parameters:**
+- `page` - Page number (default: 1)
+- `per_page` - Items per page (default: 20, max: 100)
+- `is_favorite` - Filter by favorite status
+- `tags` - Filter by tags array
+
+**Response:**
+```json
+{
+  "notes": [...],
+  "total": 25,
+  "page": 1,
+  "per_page": 20,
+  "pages": 2
+}
+```
+
+#### GET `/api/v1/notes/search` - Search Notes ✨ NEW
+**Query Parameters:**
+- `query` - Search term (required)
+- `page` - Page number
+- `per_page` - Items per page
+- `is_favorite` - Filter by favorite status
+- `tags` - Filter by tags
+
 #### POST `/api/v1/transform` - Advanced Text Transformation ✨ NEW
 **Request:**
 ```json
@@ -121,6 +171,46 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
   }
 }
 ```
+
+#### GET `/api/v1/notes/{note_id}` - Get Specific Note ✨ NEW
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "title": "My Important Note",
+  "content": "This is the content of my note...",
+  "is_favorite": false,
+  "tags": ["work", "important"],
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z",
+  "user_id": "user123"
+}
+```
+
+#### PUT `/api/v1/notes/{note_id}` - Update Note ✨ NEW
+**Request:** (all fields optional)
+```json
+{
+  "title": "Updated Note Title",
+  "content": "Updated content...",
+  "is_favorite": true,
+  "tags": ["work", "updated"]
+}
+```
+
+#### DELETE `/api/v1/notes/{note_id}` - Delete Note ✨ NEW
+**Response:**
+```json
+{
+  "message": "Note deleted successfully"
+}
+```
+
+#### GET `/api/v1/notes/favorites` - Get Favorite Notes ✨ NEW
+**Response:** Array of favorite notes
+
+#### GET `/api/v1/notes/tags` - Get User Tags ✨ NEW
+**Response:** Array of all tags used by the user
 
 #### GET `/api/v1/agents` - List Available Agents
 **Response:**
@@ -231,6 +321,23 @@ Legacy endpoint that redirects to the new summarizer agent.
    curl -X POST "http://127.0.0.1:8000/api/v1/transform" \
      -H "Content-Type: application/json" \
      -d '{"text": "hey there! hope you are doing well", "command": "make this more formal"}'
+   ```
+   
+   **Note Management:**
+   ```sh
+   # Create a note
+   curl -X POST "http://127.0.0.1:8000/api/v1/notes/" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     -d '{"title": "My Note", "content": "Note content", "tags": ["work"]}'
+   
+   # List notes
+   curl -X GET "http://127.0.0.1:8000/api/v1/notes/?page=1&per_page=10" \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN"
+   
+   # Search notes
+   curl -X GET "http://127.0.0.1:8000/api/v1/notes/search?query=work" \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN"
    ```
    
    **Authentication:**
@@ -407,9 +514,12 @@ CREATE TABLE user_preferences (
 - **TextEditorAgent**: Handles text transformations (uppercase, replace, etc.)
 - **SummarizerAgent**: AI-powered text summarization with various styles
 - **TransformerAgent**: Advanced text transformation with specialized prompts ✨ NEW
-  - Formalization (casual → formal)
-  - Simplification (complex → simple)
-  - Tone shifting (formal → friendly)
+- **NoteStorageAgent**: Personalized note storage with CRUD operations ✨ NEW
+  - Create, read, update, delete notes
+  - Full-text search functionality
+  - Tag-based organization
+  - Favorite notes system
+  - Pagination and filtering
 
 ### LangGraph & LangChain Integration
 
@@ -455,7 +565,7 @@ backend/
 │   ├── main.py                    # FastAPI app entry point (new API)
 │   ├── models/
 │   │   ├── __init__.py
-│   │   ├── requests.py            # Pydantic request/response models
+│   │   ├── requests.py            # Pydantic request/response models (+ Notes) ✨ NEW
 │   │   └── auth.py                # Authentication models ✨ NEW
 │   ├── agents/
 │   │   ├── __init__.py
@@ -470,11 +580,13 @@ backend/
 │   ├── routers/
 │   │   ├── __init__.py
 │   │   ├── text_operations.py     # API endpoints
-│   │   └── auth.py                # Authentication endpoints ✨ NEW
+│   │   ├── auth.py                # Authentication endpoints ✨ NEW
+│   │   └── notes.py               # Note storage endpoints ✨ NEW
 │   ├── services/
 │   │   ├── __init__.py
 │   │   ├── llm_service.py         # OpenAI integration
-│   │   └── auth_service.py        # Supabase authentication service ✨ NEW
+│   │   ├── auth_service.py        # Supabase authentication service ✨ NEW
+│   │   └── note_service.py        # Note storage service ✨ NEW
 │   ├── middleware/
 │   │   ├── __init__.py
 │   │   └── auth_middleware.py     # JWT authentication middleware ✨ NEW
@@ -504,6 +616,7 @@ backend/
 ├── agent.py                       # Legacy agent logic (compatibility)
 ├── test_auth.py                   # Authentication testing script ✨ NEW
 ├── test_email_confirm.py          # Email confirmation testing script ✨ NEW
+├── test_notes_api.py              # Note storage API testing script ✨ NEW
 ├── requirements.txt               # Python dependencies
 ├── pytest.ini                     # Pytest configuration
 ├── pyproject.toml                 # Project configuration
@@ -597,7 +710,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ **User preferences storage and management**
 - ✅ **JWT-based authentication middleware**
 - ✅ **Comprehensive auth error handling and validation**
-- ⬜️ Personalized note storage
+- ✅ **Personalized note storage** - Complete CRUD API with authentication
 - ⬜️ Version history and undo support
 - ⬜️ Real-time collaboration foundation
 - ⬜️ Multi-language command handling support
