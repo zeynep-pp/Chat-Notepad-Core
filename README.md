@@ -66,56 +66,6 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 }
 ```
 
-#### POST `/api/v1/notes` - Note Storage ✨ NEW
-**Request:**
-```json
-{
-  "title": "My Important Note",
-  "content": "This is the content of my note...",
-  "is_favorite": false,
-  "tags": ["work", "important"]
-}
-```
-**Response:**
-```json
-{
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "title": "My Important Note",
-  "content": "This is the content of my note...",
-  "is_favorite": false,
-  "tags": ["work", "important"],
-  "created_at": "2024-01-15T10:30:00Z",
-  "updated_at": "2024-01-15T10:30:00Z",
-  "user_id": "user123"
-}
-```
-
-#### GET `/api/v1/notes` - List User Notes ✨ NEW
-**Query Parameters:**
-- `page` - Page number (default: 1)
-- `per_page` - Items per page (default: 20, max: 100)
-- `is_favorite` - Filter by favorite status
-- `tags` - Filter by tags array
-
-**Response:**
-```json
-{
-  "notes": [...],
-  "total": 25,
-  "page": 1,
-  "per_page": 20,
-  "pages": 2
-}
-```
-
-#### GET `/api/v1/notes/search` - Search Notes ✨ NEW
-**Query Parameters:**
-- `query` - Search term (required)
-- `page` - Page number
-- `per_page` - Items per page
-- `is_favorite` - Filter by favorite status
-- `tags` - Filter by tags
-
 #### POST `/api/v1/transform` - Advanced Text Transformation ✨ NEW
 **Request:**
 ```json
@@ -172,7 +122,16 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 }
 ```
 
-#### GET `/api/v1/notes/{note_id}` - Get Specific Note ✨ NEW
+#### POST `/api/v1/notes` - Note Storage ✨ NEW
+**Request:**
+```json
+{
+  "title": "My Important Note",
+  "content": "This is the content of my note...",
+  "is_favorite": false,
+  "tags": ["work", "important"]
+}
+```
 **Response:**
 ```json
 {
@@ -187,30 +146,37 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 }
 ```
 
-#### PUT `/api/v1/notes/{note_id}` - Update Note ✨ NEW
-**Request:** (all fields optional)
-```json
-{
-  "title": "Updated Note Title",
-  "content": "Updated content...",
-  "is_favorite": true,
-  "tags": ["work", "updated"]
-}
-```
+#### GET `/api/v1/notes` - List User Notes ✨ NEW
+**Query Parameters:**
+- `page` - Page number (default: 1)
+- `per_page` - Items per page (default: 20, max: 100)
+- `is_favorite` - Filter by favorite status
+- `tags` - Filter by tags array
 
-#### DELETE `/api/v1/notes/{note_id}` - Delete Note ✨ NEW
 **Response:**
 ```json
 {
-  "message": "Note deleted successfully"
+  "notes": [...],
+  "total": 25,
+  "page": 1,
+  "per_page": 20,
+  "pages": 2
 }
 ```
 
-#### GET `/api/v1/notes/favorites` - Get Favorite Notes ✨ NEW
-**Response:** Array of favorite notes
+#### GET `/api/v1/notes/search` - Search Notes ✨ NEW
+**Query Parameters:**
+- `query` - Search term (required)
+- `page` - Page number
+- `per_page` - Items per page
+- `is_favorite` - Filter by favorite status
+- `tags` - Filter by tags
 
+#### GET `/api/v1/notes/{note_id}` - Get Specific Note ✨ NEW
+#### PUT `/api/v1/notes/{note_id}` - Update Note ✨ NEW
+#### DELETE `/api/v1/notes/{note_id}` - Delete Note ✨ NEW
+#### GET `/api/v1/notes/favorites` - Get Favorite Notes ✨ NEW
 #### GET `/api/v1/notes/tags` - Get User Tags ✨ NEW
-**Response:** Array of all tags used by the user
 
 #### GET `/api/v1/agents` - List Available Agents
 **Response:**
@@ -514,6 +480,9 @@ CREATE TABLE user_preferences (
 - **TextEditorAgent**: Handles text transformations (uppercase, replace, etc.)
 - **SummarizerAgent**: AI-powered text summarization with various styles
 - **TransformerAgent**: Advanced text transformation with specialized prompts ✨ NEW
+  - Formalization (casual → formal)
+  - Simplification (complex → simple)
+  - Tone shifting (formal → friendly)
 - **NoteStorageAgent**: Personalized note storage with CRUD operations ✨ NEW
   - Create, read, update, delete notes
   - Full-text search functionality
@@ -710,6 +679,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ **User preferences storage and management**
 - ✅ **JWT-based authentication middleware**
 - ✅ **Comprehensive auth error handling and validation**
+- ✅ User settings and preferences storage
 - ✅ **Personalized note storage** - Complete CRUD API with authentication
 - ⬜️ Version history and undo support
 - ⬜️ Real-time collaboration foundation
@@ -723,7 +693,6 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ⬜️ WebSocket support for real-time collaboration
 - ⬜️ Cloud storage integration APIs (Dropbox, Google Drive)
 - ⬜️ Plugin system backend architecture for custom commands
-- ✅ User settings and preferences storage
 - ⬜️ Advanced AI model integration options
 
 ---
