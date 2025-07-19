@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
 import logging
+from datetime import datetime, timezone
 
 from ..models.auth import (
     UserSignUpRequest,
@@ -90,8 +91,8 @@ async def get_current_user_info(current_user: Dict[str, Any] = Depends(get_curre
         id=current_user["id"],
         email=current_user["email"],
         full_name=current_user.get("full_name"),
-        created_at=current_user.get("created_at"),
-        updated_at=current_user.get("updated_at"),
+        created_at=current_user.get("created_at") or datetime.now(timezone.utc),
+        updated_at=current_user.get("updated_at") or datetime.now(timezone.utc),
         email_verified=current_user.get("email_verified", False)
     )
 

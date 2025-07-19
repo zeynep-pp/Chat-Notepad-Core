@@ -251,7 +251,7 @@ Legacy endpoint that redirects to the new summarizer agent.
    
    **Install dependencies:**
    ```sh
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
    
    **Run tests:**
