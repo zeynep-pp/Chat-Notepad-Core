@@ -58,3 +58,7 @@ class NoteSearchRequest(BaseModel):
     is_favorite: Optional[bool] = None
     page: int = Field(default=1, ge=1)
     per_page: int = Field(default=20, ge=1, le=100)
+
+class TagsResponse(BaseModel):
+    tags: List[str]
+    total: int

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from uuid import UUID
 
-from ..models.requests import NoteCreate, NoteUpdate, NoteResponse, NoteListResponse, NoteSearchRequest
+from ..models.requests import NoteCreate, NoteUpdate, NoteResponse, NoteListResponse, NoteSearchRequest, TagsResponse
 from ..services.note_service import note_service
 from ..middleware.auth_middleware import get_current_user
 
@@ -84,7 +84,7 @@ async def get_favorite_notes(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/tags", response_model=List[str])
+@router.get("/tags", response_model=TagsResponse)
 async def get_user_tags(
     current_user: dict = Depends(get_current_user)
 ):
@@ -92,7 +92,7 @@ async def get_user_tags(
     try:
         user_id = UUID(current_user["sub"])
         tags = await note_service.get_user_tags(user_id)
-        return tags
+        return TagsResponse(tags=tags, total=len(tags))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

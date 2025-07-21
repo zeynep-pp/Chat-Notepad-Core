@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import text_operations, auth, notes
+from .routers import text_operations, auth, notes, export_import
 from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
@@ -58,6 +58,16 @@ try:
     logger.info("✅ Notes router loaded successfully")
 except Exception as e:
     logger.error(f"❌ Failed to load notes router: {e}")
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+    raise
+
+# Add export/import router
+try:
+    app.include_router(export_import.router)
+    logger.info("✅ Export/Import router loaded successfully")
+except Exception as e:
+    logger.error(f"❌ Failed to load export/import router: {e}")
     import traceback
     logger.error(f"❌ Full traceback: {traceback.format_exc()}")
     raise

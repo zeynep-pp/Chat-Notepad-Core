@@ -30,6 +30,8 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 - **User Authentication**: Supabase-powered authentication and user management ✨ NEW
 - **Email Verification**: Automated email confirmation workflow ✨ NEW
 - **User Preferences**: Personalized settings and preferences storage ✨ NEW
+- **Note Storage**: Complete CRUD operations with search and tagging ✨ NEW
+- **Export/Import**: Multi-format note export (MD, TXT, PDF) and import (TXT, MD, JSON) ✨ NEW
 - **Visual Diff**: HTML diff output for frontend integration
 - **RESTful API**: Clean REST endpoints with proper error handling
 - **Comprehensive Testing**: Full test coverage with pytest
@@ -177,6 +179,16 @@ ChatNotePad.Ai is a modern multi-agent backend for intelligent text processing. 
 #### DELETE `/api/v1/notes/{note_id}` - Delete Note ✨ NEW
 #### GET `/api/v1/notes/favorites` - Get Favorite Notes ✨ NEW
 #### GET `/api/v1/notes/tags` - Get User Tags ✨ NEW
+
+### Export/Import API ✨ NEW
+
+#### GET `/api/v1/export/markdown/{note_id}` - Export Note as Markdown ✨ NEW
+#### GET `/api/v1/export/txt/{note_id}` - Export Note as TXT ✨ NEW
+#### GET `/api/v1/export/pdf/{note_id}` - Export Note as PDF ✨ NEW
+#### POST `/api/v1/export/bulk` - Bulk Export Notes ✨ NEW
+#### POST `/api/v1/import/file` - Import Notes from File ✨ NEW
+#### GET `/api/v1/import/formats` - Get Supported Import Formats ✨ NEW
+#### POST `/api/v1/import/validate` - Validate Import File ✨ NEW
 
 #### GET `/api/v1/agents` - List Available Agents
 **Response:**
@@ -550,12 +562,15 @@ backend/
 │   │   ├── __init__.py
 │   │   ├── text_operations.py     # API endpoints
 │   │   ├── auth.py                # Authentication endpoints ✨ NEW
-│   │   └── notes.py               # Note storage endpoints ✨ NEW
+│   │   ├── notes.py               # Note storage endpoints ✨ NEW
+│   │   └── export_import.py       # Export/import endpoints ✨ NEW
 │   ├── services/
 │   │   ├── __init__.py
 │   │   ├── llm_service.py         # OpenAI integration
 │   │   ├── auth_service.py        # Supabase authentication service ✨ NEW
-│   │   └── note_service.py        # Note storage service ✨ NEW
+│   │   ├── note_service.py        # Note storage service ✨ NEW
+│   │   ├── export_service.py      # Note export service (MD, TXT, PDF) ✨ NEW
+│   │   └── import_service.py      # Note import service (TXT, MD, JSON) ✨ NEW
 │   ├── middleware/
 │   │   ├── __init__.py
 │   │   └── auth_middleware.py     # JWT authentication middleware ✨ NEW
@@ -681,6 +696,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ **Comprehensive auth error handling and validation**
 - ✅ User settings and preferences storage
 - ✅ **Personalized note storage** - Complete CRUD API with authentication
+- ✅ **Export/Import System** - Full note export/import with multiple formats
 - ⬜️ Version history and undo support
 - ⬜️ Real-time collaboration foundation
 - ⬜️ Multi-language command handling support
@@ -688,8 +704,8 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ⬜️ API rate limiting and quota management
 - ⬜️ Command history storage and retrieval API
 - ⬜️ Context-aware command suggestions based on user history
-- ⬜️ Export API endpoints (Markdown, TXT, PDF formats)
-- ⬜️ File import API endpoints (Markdown, TXT file parsing)
+- ✅ **Export API endpoints (Markdown, TXT, PDF formats)**
+- ✅ **File import API endpoints (Markdown, TXT, JSON file parsing)**
 - ⬜️ WebSocket support for real-time collaboration
 - ⬜️ Cloud storage integration APIs (Dropbox, Google Drive)
 - ⬜️ Plugin system backend architecture for custom commands
