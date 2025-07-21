@@ -1,10 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from .routers import text_operations, auth, notes, export_import
 from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
 import logging
+from uuid import UUID
+import json
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +26,16 @@ except Exception as e:
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from agent import process_command
 from .utils.diff_utils import get_diff
+
+# Custom JSON encoder for UUID and datetime serialization
+from datetime import datetime
+class UUIDEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            return str(obj)
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 app = FastAPI(
     title="ChatNotePad.Ai Backend",

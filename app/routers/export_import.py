@@ -136,7 +136,16 @@ async def import_file(
                     "message": f"Successfully imported {result['imported_count']} out of {result['total_count']} notes",
                     "imported_count": result["imported_count"],
                     "total_count": result["total_count"],
-                    "notes": [note.model_dump() for note in result["notes"]],
+                    "notes": [
+                        {
+                            **note.model_dump(),
+                            "id": str(note.id),
+                            "user_id": str(note.user_id),
+                            "created_at": note.created_at.isoformat() if note.created_at else None,
+                            "updated_at": note.updated_at.isoformat() if note.updated_at else None
+                        }
+                        for note in result["notes"]
+                    ],
                     "errors": result["errors"]
                 },
                 status_code=200 if not result["errors"] else 207  # 207 = Multi-Status
