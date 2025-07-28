@@ -20,7 +20,12 @@ class NoteService:
             response = self.supabase.table(self.table_name).insert(note_dict).execute()
             
             if response.data:
-                return NoteResponse(**response.data[0])
+                note = NoteResponse(**response.data[0])
+                
+                # Create initial version
+                await self._create_initial_version(note.id, user_id, note.content)
+                
+                return note
             else:
                 raise Exception("Failed to create note")
                 
@@ -50,6 +55,10 @@ class NoteService:
             if not update_dict:
                 # If no updates, return current note
                 return await self.get_note(note_id, user_id)
+            
+            # If content is being updated, create a version first
+            if 'content' in update_dict:
+                await self._auto_save_version(note_id, user_id, update_dict['content'])
             
             response = self.supabase.table(self.table_name).update(update_dict).eq(
                 "id", str(note_id)
@@ -226,6 +235,45 @@ class NoteService:
             
         except Exception as e:
             raise Exception(f"Error fetching user tags: {str(e)}")
+
+    async def _create_initial_version(self, note_id: UUID, user_id: UUID, content: str):
+        """Create the initial version when a note is created"""
+        try:
+            version_data = {
+                "note_id": str(note_id),
+                "user_id": str(user_id),
+                "content": content,
+                "version_number": 1,
+                "change_description": "Initial version"
+            }
+            
+            self.supabase.table("note_versions").insert(version_data).execute()
+            
+        except Exception as e:
+            # Don't fail note creation if versioning fails
+            print(f"Warning: Failed to create initial version: {str(e)}")
+
+    async def _auto_save_version(self, note_id: UUID, user_id: UUID, new_content: str):
+        """Auto-save a version if content has changed significantly"""
+        try:
+            # Get the current note content
+            current_note = await self.get_note(note_id, user_id)
+            if not current_note:
+                return
+            
+            # Use version service for smart versioning
+            from .version_service import VersionService
+            version_service = VersionService()
+            
+            await version_service.auto_save_version(
+                user_id=user_id,
+                note_id=note_id,
+                content=new_content
+            )
+            
+        except Exception as e:
+            # Don't fail the update if versioning fails
+            print(f"Warning: Auto-versioning failed: {str(e)}")
 
 
 # Singleton instance

@@ -62,3 +62,77 @@ class NoteSearchRequest(BaseModel):
 class TagsResponse(BaseModel):
     tags: List[str]
     total: int
+
+# Version History Models
+class NoteVersionResponse(BaseModel):
+    id: UUID
+    note_id: UUID
+    version_number: int
+    content: str
+    change_description: Optional[str] = None
+    created_at: datetime
+    user_id: UUID
+
+class NoteVersionCreate(BaseModel):
+    change_description: Optional[str] = None
+
+class NoteVersionsListResponse(BaseModel):
+    versions: List[NoteVersionResponse]
+    total: int
+    note_id: UUID
+
+class NoteDiffResponse(BaseModel):
+    note_id: UUID
+    version1: int
+    version2: int
+    diff_html: str
+    diff_text: str
+
+# Command History Models
+class CommandHistoryResponse(BaseModel):
+    id: UUID
+    command: str
+    input_text: str
+    output_text: Optional[str] = None
+    agent_used: Optional[str] = None
+    success: bool
+    processing_time_ms: Optional[int] = None
+    created_at: datetime
+
+class CommandHistoryListResponse(BaseModel):
+    commands: List[CommandHistoryResponse]
+    total: int
+    page: int
+    per_page: int
+    pages: int
+
+class CommandStatsResponse(BaseModel):
+    total_commands: int
+    success_rate: float
+    most_used_commands: List[dict]
+    avg_processing_time: Optional[float] = None
+
+# AI Suggestions Models
+class SuggestionRequest(BaseModel):
+    context: str
+    text: str
+    cursor_position: int
+    context_type: str = Field(default="content", pattern="^(content|command|style)$")
+
+class SuggestionResponse(BaseModel):
+    suggestions: List[str]
+    context_type: str
+    confidence: float
+
+# Translation Models
+class TranslationRequest(BaseModel):
+    text: str
+    target_language: str
+    source_language: Optional[str] = None
+
+class TranslationResponse(BaseModel):
+    original_text: str
+    translated_text: str
+    source_language: str
+    target_language: str
+    confidence: float

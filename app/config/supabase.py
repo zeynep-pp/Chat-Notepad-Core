@@ -59,3 +59,8 @@ supabase_config = SupabaseConfig()
 
 # Export client for easy import
 supabase_client = supabase_config.get_client()
+
+# Export function for compatibility
+def get_supabase_client() -> Client:
+    """Get the Supabase client instance"""
+    return supabase_config.get_client()

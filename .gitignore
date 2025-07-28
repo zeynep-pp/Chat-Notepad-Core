@@ -13,3 +13,12 @@ wheels/
 .env
 .env.local
 .env.*.local
+
+# Credentials and secrets
+credentials/
+*.json
+google-credentials.json
+google-service-account.json
+*-service-account.json
+google-oauth-client.json
+client_secret_*.json

@@ -1,14 +1,42 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any, Optional
+from uuid import UUID
+import time
 from ..models.requests import TextRequest, TextResponse, AgentInfo
 from ..core.agent_manager import AgentManager
 from ..utils.diff_utils import get_diff
 from ..middleware.auth_middleware import get_current_user, get_optional_user
+from ..services.history_service import HistoryService
 
 router = APIRouter(prefix="/api/v1", tags=["text"])
 
 async def get_agent_manager() -> AgentManager:
     return AgentManager()
+
+async def log_command_execution(
+    user_id: UUID,
+    command: str,
+    input_text: str,
+    output_text: str,
+    agent_used: str,
+    success: bool,
+    processing_time_ms: int
+):
+    """Log command execution to history"""
+    try:
+        history_service = HistoryService()
+        await history_service.log_command(
+            user_id=user_id,
+            command=command,
+            input_text=input_text,
+            output_text=output_text,
+            agent_used=agent_used,
+            success=success,
+            processing_time_ms=processing_time_ms
+        )
+    except Exception as e:
+        # Don't fail the operation if logging fails
+        print(f"Warning: Failed to log command execution: {str(e)}")
 
 @router.post("/prompt", response_model=TextResponse)
 async def process_text(
@@ -16,17 +44,50 @@ async def process_text(
     agent_manager: AgentManager = Depends(get_agent_manager),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
+    start_time = time.time()
+    success = False
+    result_text = ""
+    agent_used = "editor"
+    
     try:
         result = await agent_manager.execute("editor", request.text, request.command)
-        diff = get_diff(request.text, result["result"])
+        success = result["success"]
+        result_text = result["result"]
+        agent_used = result["agent_used"]
+        
+        diff = get_diff(request.text, result_text)
+        
+        # Log command execution
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=result_text,
+            agent_used=agent_used,
+            success=success,
+            processing_time_ms=processing_time_ms
+        )
+        
         return TextResponse(
-            result=result["result"],
-            success=result["success"],
-            agent_used=result["agent_used"],
+            result=result_text,
+            success=success,
+            agent_used=agent_used,
             diff=diff,
             agent_info=AgentInfo(**result["agent_info"])
         )
     except Exception as e:
+        # Log failed execution
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=str(e),
+            agent_used=agent_used,
+            success=False,
+            processing_time_ms=processing_time_ms
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/summarize", response_model=TextResponse)
@@ -35,17 +96,50 @@ async def summarize_text(
     agent_manager: AgentManager = Depends(get_agent_manager),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
+    start_time = time.time()
+    success = False
+    result_text = ""
+    agent_used = "summarizer"
+    
     try:
         result = await agent_manager.execute("summarizer", request.text, request.command)
-        diff = get_diff(request.text, result["result"])
+        success = result["success"]
+        result_text = result["result"]
+        agent_used = result["agent_used"]
+        
+        diff = get_diff(request.text, result_text)
+        
+        # Log command execution
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=result_text,
+            agent_used=agent_used,
+            success=success,
+            processing_time_ms=processing_time_ms
+        )
+        
         return TextResponse(
-            result=result["result"],
-            success=result["success"],
-            agent_used=result["agent_used"],
+            result=result_text,
+            success=success,
+            agent_used=agent_used,
             diff=diff,
             agent_info=AgentInfo(**result["agent_info"])
         )
     except Exception as e:
+        # Log failed execution
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=str(e),
+            agent_used=agent_used,
+            success=False,
+            processing_time_ms=processing_time_ms
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/transform", response_model=TextResponse)
@@ -60,6 +154,11 @@ async def transform_text(
     - Simplification (complex → simple, technical → layman)
     - Formalization (casual → formal, informal → professional)
     """
+    start_time = time.time()
+    success = False
+    result_text = ""
+    agent_used = "transformer"
+    
     try:
         # Validate input
         if not request.text or not request.text.strip():
@@ -77,21 +176,58 @@ async def transform_text(
         
         # Execute transformation using the transformer agent
         result = await agent_manager.execute("transformer", request.text, request.command)
+        success = result["success"]
+        result_text = result["result"]
+        agent_used = result["agent_used"]
         
         # Generate diff for comparison
-        diff = get_diff(request.text, result["result"])
+        diff = get_diff(request.text, result_text)
+        
+        # Log command execution
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=result_text,
+            agent_used=agent_used,
+            success=success,
+            processing_time_ms=processing_time_ms
+        )
         
         return TextResponse(
-            result=result["result"],
-            success=result["success"],
-            agent_used=result["agent_used"],
+            result=result_text,
+            success=success,
+            agent_used=agent_used,
             diff=diff,
             agent_info=AgentInfo(**result["agent_info"])
         )
     
-    except HTTPException:
+    except HTTPException as he:
+        # Log failed execution for HTTP exceptions
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=str(he.detail),
+            agent_used=agent_used,
+            success=False,
+            processing_time_ms=processing_time_ms
+        )
         raise
     except Exception as e:
+        # Log failed execution
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        await log_command_execution(
+            user_id=UUID(current_user["id"]),
+            command=request.command,
+            input_text=request.text,
+            output_text=str(e),
+            agent_used=agent_used,
+            success=False,
+            processing_time_ms=processing_time_ms
+        )
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/agents")

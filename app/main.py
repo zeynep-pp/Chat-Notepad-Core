@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
-from .routers import text_operations, auth, notes, export_import
+from .routers import text_operations, auth, notes, export_import, versions, history, ai
 from .models.requests import TextRequest, TextResponse, AgentInfo
 import sys
 import os
@@ -81,6 +81,36 @@ try:
     logger.info("✅ Export/Import router loaded successfully")
 except Exception as e:
     logger.error(f"❌ Failed to load export/import router: {e}")
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+    raise
+
+# Add version router
+try:
+    app.include_router(versions.router)
+    logger.info("✅ Versions router loaded successfully")
+except Exception as e:
+    logger.error(f"❌ Failed to load versions router: {e}")
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+    raise
+
+# Add history router
+try:
+    app.include_router(history.router)
+    logger.info("✅ History router loaded successfully")
+except Exception as e:
+    logger.error(f"❌ Failed to load history router: {e}")
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+    raise
+
+# Add AI router
+try:
+    app.include_router(ai.router)
+    logger.info("✅ AI router loaded successfully")
+except Exception as e:
+    logger.error(f"❌ Failed to load AI router: {e}")
     import traceback
     logger.error(f"❌ Full traceback: {traceback.format_exc()}")
     raise
