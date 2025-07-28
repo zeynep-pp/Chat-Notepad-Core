@@ -46,7 +46,13 @@ async def create_note_version(
         # Get current note content
         from app.services.note_service import NoteService
         note_service = NoteService()
-        note = await note_service.get_note(user_id, note_id)
+        note = await note_service.get_note(note_id, user_id)
+        
+        if not note:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Note not found: {note_id}"
+            )
         
         return await version_service.create_version(
             user_id=user_id,
