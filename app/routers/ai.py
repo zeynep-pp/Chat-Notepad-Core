@@ -13,7 +13,9 @@ from app.models.requests import (
     StyleImprovementRequest,
     StyleImprovementResponse,
     QuickSummaryRequest,
-    QuickSummaryResponse
+    QuickSummaryResponse,
+    TextExpansionRequest,
+    TextExpansionResponse
 )
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
@@ -211,6 +213,37 @@ async def quick_summary(
             original_length=original_length,
             summary_length=summary_length,
             compression_ratio=compression_ratio
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.post("/expand-text", response_model=TextExpansionResponse)
+@rate_limit(max_requests=100, window_seconds=3600)  # 100 requests per hour
+async def expand_text(
+    request: TextExpansionRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Expand the given text based on context."""
+    try:
+        user_id = UUID(current_user["id"])
+        
+        # Basic text expansion placeholder - should be replaced with AI expansion
+        original_length = len(request.text)
+        
+        # Simple expansion by adding context-based content
+        expanded_text = f"{request.text} This text has been expanded based on the context: {request.context}. Additional details and explanations could be provided here to make the content more comprehensive and informative."
+        
+        expanded_length = len(expanded_text)
+        expansion_ratio = expanded_length / original_length if original_length > 0 else 1.0
+        
+        return TextExpansionResponse(
+            expanded_text=expanded_text,
+            original_text=request.text,
+            context=request.context,
+            expansion_ratio=expansion_ratio
         )
     except Exception as e:
         raise HTTPException(

@@ -160,3 +160,14 @@ class QuickSummaryResponse(BaseModel):
     original_length: int
     summary_length: int
     compression_ratio: float
+
+# Text Expansion Models
+class TextExpansionRequest(BaseModel):
+    text: str
+    context: str
+
+class TextExpansionResponse(BaseModel):
+    expanded_text: str
+    original_text: str
+    context: str
+    expansion_ratio: float
