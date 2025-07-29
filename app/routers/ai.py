@@ -9,7 +9,11 @@ from app.models.requests import (
     SuggestionRequest,
     SuggestionResponse,
     TranslationRequest,
-    TranslationResponse
+    TranslationResponse,
+    StyleImprovementRequest,
+    StyleImprovementResponse,
+    QuickSummaryRequest,
+    QuickSummaryResponse
 )
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
@@ -47,7 +51,7 @@ async def get_suggestion_stats(
         )
 
 @router.post("/translate", response_model=TranslationResponse)
-@rate_limit(max_requests=100, window_seconds=3600)  # 100 requests per hour
+@rate_limit(max_requests=200, window_seconds=3600)  # 200 requests per hour
 async def translate_text(
     request: TranslationRequest,
     current_user: dict = Depends(get_current_user)
@@ -133,6 +137,84 @@ async def get_supported_languages():
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@router.post("/improve-style", response_model=StyleImprovementResponse)
+@rate_limit(max_requests=100, window_seconds=3600)  # 100 requests per hour
+async def improve_style(
+    request: StyleImprovementRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Improve the style and quality of the given text."""
+    try:
+        user_id = UUID(current_user["id"])
+        
+        # Create a basic style improvement response
+        # This is a placeholder implementation - you would integrate with an AI service
+        improved_text = request.text  # Placeholder - should be improved by AI
+        suggestions = [
+            "Consider using more active voice",
+            "Break long sentences into shorter ones",
+            "Use more specific vocabulary"
+        ]
+        
+        return StyleImprovementResponse(
+            improved_text=improved_text,
+            original_text=request.text,
+            suggestions=suggestions,
+            confidence=0.85
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.post("/quick-summary", response_model=QuickSummaryResponse)
+@rate_limit(max_requests=150, window_seconds=3600)  # 150 requests per hour
+async def quick_summary(
+    request: QuickSummaryRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate a quick summary of the given text."""
+    try:
+        user_id = UUID(current_user["id"])
+        
+        # Basic text truncation for now - should be replaced with AI summarization
+        original_length = len(request.text)
+        words = request.text.split()
+        
+        # Simple summary by taking first portion of text up to max_length
+        if len(request.text) <= request.max_length:
+            summary = request.text
+        else:
+            # Find a good cutoff point near max_length
+            summary = request.text[:request.max_length]
+            # Try to end at a sentence boundary
+            last_period = summary.rfind('.')
+            last_exclamation = summary.rfind('!')
+            last_question = summary.rfind('?')
+            last_sentence_end = max(last_period, last_exclamation, last_question)
+            
+            if last_sentence_end > request.max_length * 0.7:  # If we found a good ending point
+                summary = summary[:last_sentence_end + 1]
+            else:
+                summary = summary.rstrip() + "..."
+        
+        summary_length = len(summary)
+        compression_ratio = summary_length / original_length if original_length > 0 else 1.0
+        
+        return QuickSummaryResponse(
+            summary=summary,
+            original_text=request.text,
+            original_length=original_length,
+            summary_length=summary_length,
+            compression_ratio=compression_ratio
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
 

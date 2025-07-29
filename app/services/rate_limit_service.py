@@ -287,9 +287,17 @@ class RateLimitService:
 def rate_limit(max_requests: int = 100, window_seconds: int = 3600):
     """Decorator for rate limiting endpoints."""
     def decorator(func):
+        import functools
+        
+        @functools.wraps(func)
         async def wrapper(*args, **kwargs):
-            # Extract user from kwargs (assuming it's passed from auth middleware)
-            current_user = kwargs.get('current_user')
+            # Extract current_user from function parameters
+            import inspect
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+            
+            current_user = bound_args.arguments.get('current_user')
             if not current_user:
                 return await func(*args, **kwargs)
             

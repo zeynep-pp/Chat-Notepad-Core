@@ -136,3 +136,27 @@ class TranslationResponse(BaseModel):
     source_language: str
     target_language: str
     confidence: float
+
+# Style Improvement Models
+class StyleImprovementRequest(BaseModel):
+    text: str
+    context: str
+    cursor_position: int
+
+class StyleImprovementResponse(BaseModel):
+    improved_text: str
+    original_text: str
+    suggestions: List[str]
+    confidence: float
+
+# Quick Summary Models
+class QuickSummaryRequest(BaseModel):
+    text: str
+    max_length: int = Field(default=100, ge=10, le=500)
+
+class QuickSummaryResponse(BaseModel):
+    summary: str
+    original_text: str
+    original_length: int
+    summary_length: int
+    compression_ratio: float
