@@ -707,8 +707,7 @@ Feel free to open issues or PRs for improvements, new features, or bug fixes!
 - ✅ **Export API endpoints (Markdown, TXT, PDF formats)**
 - ✅ **File import API endpoints (Markdown, TXT, JSON file parsing)**
 - ⬜️ WebSocket support for real-time collaboration
-- ⬜️ Cloud storage integration APIs (Dropbox, Google Drive)
-- ⬜️ Plugin system backend architecture for custom commands
+- ✅ Cloud storage integration APIs (Dropbox, Google Drive)
 - ✅ Advanced AI model integration options
 
 ---
